@@ -1,0 +1,25 @@
+# Combine with ai,postgres,redis,semantic. Explicit startup checks reject an unsafe profile combination.
+support:
+  seed:
+    enabled: false
+  evaluation:
+    enabled: false
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:16}
+      connection-timeout: 3000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+server:
+  tomcat:
+    threads:
+      max: 64
+    accept-count: 32
+    max-connections: 256
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

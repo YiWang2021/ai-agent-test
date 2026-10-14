@@ -1,0 +1,4 @@
+{"type":"local-http-simulated-model","requests":32,"clientConcurrency":32,
+"instanceLimit":8,"simulatedModelMillis":1000,"successful":8,"rejected429":24,
+"unexpectedResponses":0,"peakModelExecutions":8,"p95AllRequestsMillis":1487,
+"elapsedIncludingRecoveryMillis":2525,"recoverySucceeded":true}

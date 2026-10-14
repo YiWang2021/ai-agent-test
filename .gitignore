@@ -1,0 +1,9 @@
+target/
+.idea/
+*.iml
+.env
+.env.vm
+.env.local
+.env.production.local
+data/
+*.log

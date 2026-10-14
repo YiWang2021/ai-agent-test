@@ -1,0 +1,20 @@
+{
+  "otherUser": {
+    "tenantId": "tenant-b",
+    "userId": "user-900",
+    "role": "USER",
+    "admin": false
+  },
+  "insertedAndRetrieved": true,
+  "deleted": true,
+  "updatedAndRetrieved": true,
+  "spoofedRoleStatus": 403,
+  "user": {
+    "tenantId": "tenant-a",
+    "userId": "user-001",
+    "role": "USER",
+    "admin": false
+  },
+  "health": "UP",
+  "absentAfterDelete": true
+}

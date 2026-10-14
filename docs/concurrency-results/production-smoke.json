@@ -1,0 +1,12 @@
+{
+  "evaluationStatus": 404,
+  "metricsPublicStatus": 404,
+  "demoKeyStatus": 401,
+  "health": "UP",
+  "productionIdentity": {
+    "tenantId": "tenant-a",
+    "userId": "user-001",
+    "role": "USER",
+    "admin": false
+  }
+}

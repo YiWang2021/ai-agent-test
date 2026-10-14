@@ -1,0 +1,99 @@
+@host = http://localhost:8080
+@apiKey = demo-key
+@adminApiKey = 在这里填写.env.local中的SUPPORT_ADMIN_API_KEY
+
+### 1. RAG 知识问答
+POST {{host}}/api/chat
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+X-Tenant-Id: tenant-a
+X-User-Id: user-001
+
+{"conversationId":"demo-1","message":"E03 是什么，应该怎样处理？","confirmWrite":false}
+
+### 2. Function Tool：查询设备状态
+POST {{host}}/api/chat
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+X-Tenant-Id: tenant-a
+X-User-Id: user-001
+
+{"conversationId":"demo-1","message":"查询 device-001 当前状态和电量","confirmWrite":false}
+
+### 3. 写工具第一次调用：应要求确认
+POST {{host}}/api/chat
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+X-Tenant-Id: tenant-a
+X-User-Id: user-001
+
+{"conversationId":"demo-2","message":"给 device-001 创建工单，E03 反复出现","confirmWrite":false}
+
+### 4. 用户确认后执行；重复相同幂等键只会生成一张工单
+POST {{host}}/api/chat
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+X-Tenant-Id: tenant-a
+X-User-Id: user-001
+
+{"conversationId":"demo-2","message":"确认给 device-001 创建工单，E03 反复出现","idempotencyKey":"ticket-demo-001","confirmWrite":true}
+
+### 5. SSE 流式输出
+POST {{host}}/api/chat/stream
+Content-Type: application/json
+Accept: text/event-stream
+X-API-Key: {{apiKey}}
+X-Tenant-Id: tenant-a
+X-User-Id: user-001
+
+{"conversationId":"demo-stream","message":"如何处理设备离线？","confirmWrite":false}
+
+### 6. 管理员更新知识库
+POST {{host}}/api/admin/knowledge
+Content-Type: application/json
+X-API-Key: {{adminApiKey}}
+X-Tenant-Id: tenant-a
+X-User-Id: admin-001
+X-Role: ADMIN
+
+{"documentId":"demo-faq","title":"演示 FAQ","source":"faq/demo.md","content":"演示模式下，蓝色按钮用于启动设备，红色按钮用于停止设备。"}
+
+### 7. 运行 50 条检索评测
+POST {{host}}/api/admin/evaluations/run?mode=retrieval&limit=50
+X-API-Key: {{adminApiKey}}
+X-Tenant-Id: tenant-a
+X-User-Id: admin-001
+X-Role: ADMIN
+
+### 8. 健康检查与 Prometheus 指标
+GET {{host}}/actuator/health
+
+###
+GET {{host}}/actuator/prometheus
+
+### 9. 服务端解析当前凭据的真实身份（改请求头不能变成管理员）
+GET {{host}}/api/session
+X-API-Key: {{apiKey}}
+
+### 10. 查看候选召回、重排得分和最终 TopK
+POST {{host}}/api/admin/knowledge/search
+Content-Type: application/json
+X-API-Key: {{adminApiKey}}
+
+{"query":"E03 主刷卡住怎么办","rerank":true}
+
+### 11. 不重排的检索基线
+POST {{host}}/api/admin/evaluations/run?mode=retrieval-baseline&limit=50
+X-API-Key: {{adminApiKey}}
+
+### 12. 真实回答与引用评测（ai 模式会调用外部模型、产生费用）
+POST {{host}}/api/admin/evaluations/run?mode=agent&limit=50
+X-API-Key: {{adminApiKey}}
+
+### 13. 真实工具轨迹评测（不确认写入）
+POST {{host}}/api/admin/evaluations/run?mode=tools&limit=10
+X-API-Key: {{adminApiKey}}
+
+### 14. 删除上面手工创建的 FAQ
+DELETE {{host}}/api/admin/knowledge/demo-faq
+X-API-Key: {{adminApiKey}}

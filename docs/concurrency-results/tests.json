@@ -1,0 +1,178 @@
+{
+  "tests": 63.0,
+  "suites": [
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.agent.AgentExecutionTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.agent.ModelCircuitBreakerTest",
+      "failures": 0,
+      "tests": 1,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.agent.ModelTransportIntegrationTest",
+      "failures": 0,
+      "tests": 2,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.agent.ReliableAgentRunnerTest",
+      "failures": 0,
+      "tests": 6,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.concurrency.AdmissionControllerTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.concurrency.AgentConcurrencyLoadTest",
+      "failures": 0,
+      "tests": 1,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.concurrency.LeaseSupervisorTest",
+      "failures": 0,
+      "tests": 2,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.concurrency.RedisAdmissionIntegrationTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.config.ProductionSafetyConfigurationTest",
+      "failures": 0,
+      "tests": 1,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.config.RedisSocketConfigurationTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.evaluation.EvaluationServiceTest",
+      "failures": 0,
+      "tests": 4,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.memory.ConversationMemoryTest",
+      "failures": 0,
+      "tests": 2,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.memory.RedisMemoryIntegrationTest",
+      "failures": 0,
+      "tests": 4,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.rag.KnowledgeRerankerTest",
+      "failures": 0,
+      "tests": 1,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.rag.KnowledgeServiceIntegrationTest",
+      "failures": 0,
+      "tests": 2,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.rag.PostgresKnowledgeConcurrencyTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.rag.SemanticEmbeddingIntegrationTest",
+      "failures": 0,
+      "tests": 2,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.security.IdentityIsolationTest",
+      "failures": 0,
+      "tests": 4,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.tool.AgentToolsFailureTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.tool.AgentToolsIntegrationTest",
+      "failures": 0,
+      "tests": 5,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.web.ApiExceptionHandlerTest",
+      "failures": 0,
+      "tests": 1,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.web.ChatControllerTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.web.ConcurrencyHttpTest",
+      "failures": 0,
+      "tests": 3,
+      "skipped": 0
+    },
+    {
+      "errors": 0,
+      "suite": "com.example.supportagent.web.DisabledEvaluationTest",
+      "failures": 0,
+      "tests": 1,
+      "skipped": 0
+    }
+  ],
+  "date": "2026-10-13",
+  "skipped": 0.0,
+  "note": "Full run: 62 passed. Added one PostgreSQL rollback scenario and reran all three PostgreSQL scenarios. Latest distinct test results are aggregated here.",
+  "errors": 0.0,
+  "failures": 0.0
+}

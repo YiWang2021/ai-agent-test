@@ -1,0 +1,11 @@
+# question	expectedTool	expectedCode	expectedKeyword
+查询 device-001 当前状态和电量	get_device_status	OK	18
+查询 device-002 当前状态和电量	get_device_status	OK	76
+查询 device-001 的耗材和主刷寿命	get_consumable_advice	OK	12
+查询 device-002 的耗材和主刷寿命	get_consumable_advice	OK	68
+查询 device-001 的未关闭工单	list_open_tickets	OK	工单
+查询 device-900 当前状态和电量	get_device_status	RESOURCE_UNAVAILABLE	当前用户
+查询 device-999 当前状态和电量	get_device_status	RESOURCE_UNAVAILABLE	设备
+给 device-001 创建工单，E03 反复出现	create_support_ticket	CONFIRMATION_REQUIRED	确认
+给 device-900 创建工单，充电异常	create_support_ticket	RESOURCE_UNAVAILABLE	当前用户
+查询 device-900 的耗材和主刷寿命	get_consumable_advice	RESOURCE_UNAVAILABLE	当前用户

@@ -1,0 +1,23 @@
+{
+  "mode": "tools",
+  "total": 10,
+  "successful": 8,
+  "successRate": 0.8,
+  "averageLatencyMs": 2118.6186,
+  "p95LatencyMs": 2908.2062,
+  "meanReciprocalRank": 0.0,
+  "responder": "SpringAiResponder",
+  "embeddingModel": "TransformersEmbeddingModel",
+  "failures": [
+    {
+      "question": "给 device-001 创建工单，E03 反复出现",
+      "expected": "create_support_ticket:CONFIRMATION_REQUIRED:确认",
+      "actual": "查询结果如下：\n\n**设备状态（device-001，CleanBot X1）**\n- 状态：离线\n- 电量：18%\n- 当前错误码：E03\n- 最后在线：2026-10-11 10:20:49\n\n**E03 说明（来源：manual/error-codes.md）**\nE03 表示主刷被毛发或异物缠绕。手册建议的处理... tools=[ToolEvent[tool=get_device_status, code=OK], ToolEvent[tool=search_product_knowledge, code=OK]]"
+    },
+    {
+      "question": "给 device-900 创建工单，充电异常",
+      "expected": "create_support_ticket:RESOURCE_UNAVAILABLE:当前用户",
+      "actual": "无法为 device-900 创建工单。\n\n**原因**：设备不存在或不属于当前用户，请核对设备编号。\n\n由于该设备编号无法验证，我不能为它创建工单，也不能查询它的状态或历史记录。建议您：\n\n1. 核对设备编号（通常在机身标签或 App 设备信息页），确认后重新提供；\n2. 如果确认编号无误，可联系人工客服协助核实设备... tools=[ToolEvent[tool=get_device_status, code=RESOURCE_UNAVAILABLE]]"
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+'use strict';
+const $ = (id) => document.getElementById(id);
+const uid = () => crypto.randomUUID();
+let conversationId = uid();
+let identity = { key: 'demo-key', tenant: 'tenant-a', user: 'user-001' };
+let busy = false;
+let pendingConfirmation = null;
+
+function resetChat() {
+  pendingConfirmation = null;
+  conversationId = uid();
+  $('messages').replaceChildren();
+  $('welcome').hidden = false;
+  $('message').value = '';
+  $('message').focus();
+}
+
+function setBusy(value) {
+  busy = value;
+  document.querySelectorAll('[data-prompt], #send, #new-chat, #settings-open, .action').forEach(el => { el.disabled = value; });
+  $('message').disabled = value;
+  $('send').textContent = value ? '思考中…' : '发送 ↑';
+}
+
+function scrollBottom() { $('conversation').scrollTop = $('conversation').scrollHeight; }
+
+function addMessage(text, role = 'assistant') {
+  $('welcome').hidden = true;
+  const row = document.createElement('article');
+  row.className = `message ${role}`;
+  const icon = document.createElement('span');
+  icon.className = 'message-icon';
+  icon.textContent = role === 'user' ? 'U' : '✳';
+  const content = document.createElement('div');
+  content.className = 'message-content';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  content.append(bubble);
+  row.append(icon, content);
+  $('messages').append(row);
+  scrollBottom();
+  return { row, content, bubble };
+}
+
+function addConfirmation(content, request) {
+  const button = document.createElement('button');
+  button.className = 'action';
+  button.textContent = '核对并确认创建工单';
+  button.addEventListener('click', () => {
+    pendingConfirmation = { request, button };
+    $('confirm-text').textContent = request.message;
+    $('confirm').showModal();
+  });
+  content.append(button);
+}
+
+async function send(message, confirmedRequest = null) {
+  if (busy || !message.trim()) return;
+  const request = confirmedRequest || { conversationId, message: message.trim(), confirmWrite: false, idempotencyKey: uid() };
+  addMessage(request.confirmWrite ? `确认提交工单：${request.message}` : request.message, 'user');
+  $('message').value = '';
+  setBusy(true);
+  const reply = addMessage('正在查询，请稍等…');
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': identity.key },
+      body: JSON.stringify(request),
+      signal: AbortSignal.timeout(60000)
+    });
+    if (!response.ok) {
+      const traceId = response.headers.get('X-Trace-Id');
+      const traceHint = traceId ? ` 排查编号 TRACE ${traceId}` : '';
+      if (response.status === 409) throw new Error('当前对话仍有请求在处理，请等待完成后再发送。' + traceHint);
+      if (response.status === 429) throw new Error('请求过于频繁或服务繁忙，请稍后再试。' + traceHint);
+      if (response.status === 503) throw new Error('服务暂时不可用；如果涉及报修，请先核实工单状态。' + traceHint);
+      if (response.status === 401 || response.status === 403) throw new Error('访问未通过验证，请在左下角「连接设置」检查 API Key、租户和用户 ID。' + traceHint);
+      throw new Error(`服务暂时无法处理请求（HTTP ${response.status}），请查看 IDEA 的后端日志后重试。${traceHint}`);
+    }
+    const data = await response.json();
+    if (typeof data.answer !== 'string') throw new Error('接口返回格式异常，请检查后端日志。');
+    reply.bubble.textContent = data.answer;
+    if (data.citations?.length) {
+      const details = document.createElement('details');
+      details.className = 'sources';
+      const summary = document.createElement('summary');
+      summary.textContent = `参考来源 · ${data.citations.length} 条`;
+      const list = document.createElement('ul');
+      data.citations.forEach(citation => {
+        const item = document.createElement('li');
+        item.textContent = `${citation.title} · ${citation.source}`;
+        list.append(item);
+      });
+      details.append(summary, list);
+      reply.content.append(details);
+    }
+    if (data.traceId) {
+      const trace = document.createElement('div');
+      trace.className = 'trace';
+      trace.textContent = `TRACE ${data.traceId}`;
+      reply.content.append(trace);
+    }
+    if (!request.confirmWrite && /工单|报修/.test(request.message + data.answer) && /确认/.test(data.answer)) addConfirmation(reply.content, request);
+  } catch (error) {
+    reply.row.classList.add('error');
+    reply.bubble.textContent = error.name === 'TimeoutError'
+      ? '等待回复超时。如果刚刚提交了工单，可以先查询工单状态；重试会沿用同一请求编号。'
+      : error instanceof TypeError ? '连接失败，请确认 IDEA 中的服务仍在运行，然后重试。' : error.message;
+    const retry = document.createElement('button');
+    retry.className = 'action';
+    retry.textContent = '重试这条请求';
+    retry.onclick = () => {
+      retry.remove();
+      if (request.confirmWrite) {
+        addConfirmation(reply.content, request);
+      } else send(request.message, request);
+    };
+    reply.content.append(retry);
+  } finally {
+    setBusy(false);
+    scrollBottom();
+    $('message').focus();
+  }
+}
+
+document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => send(button.dataset.prompt)));
+$('chat-form').addEventListener('submit', event => { event.preventDefault(); send($('message').value); });
+$('message').addEventListener('keydown', event => {
+  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); $('chat-form').requestSubmit(); }
+});
+$('new-chat').onclick = resetChat;
+$('settings-open').onclick = () => {
+  $('api-key').value = identity.key;
+  $('tenant').value = identity.tenant;
+  $('user').value = identity.user;
+  $('settings').showModal();
+};
+$('settings-close').onclick = () => $('settings').close();
+$('tenant').readOnly = true;
+$('user').readOnly = true;
+const settingsNotice = document.createElement('p');
+settingsNotice.setAttribute('role', 'status');
+$('settings-form').append(settingsNotice);
+$('settings-form').querySelector('p').textContent = '访问密钥决定账号身份；租户和用户由服务器验证后返回。密钥仅保留在当前页面内存中。';
+$('settings-form').onsubmit = async event => {
+  event.preventDefault();
+  const key = $('api-key').value.trim();
+  if (!key) return;
+  const submit = $('settings-form').querySelector('button[type="submit"], button.primary');
+  submit.disabled = true;
+  try {
+    const response = await fetch('/api/session', { headers: { 'X-API-Key': key }, signal: AbortSignal.timeout(8000) });
+    if (!response.ok) throw new Error('密钥无效，无法切换账号。请填写后端为该账号配置的访问密钥。');
+    const account = await response.json();
+    identity = { key, tenant: account.tenantId, user: account.userId };
+  const tenantLabel = document.createElement('small');
+  tenantLabel.textContent = identity.tenant;
+  $('identity-label').replaceChildren(document.createTextNode(identity.user), tenantLabel);
+  $('settings').close();
+  resetChat();
+    settingsNotice.textContent = '';
+  } catch (error) { settingsNotice.textContent = error.message; }
+  finally { submit.disabled = false; }
+};
+$('confirm-cancel').onclick = () => $('confirm').close();
+$('confirm-submit').onclick = () => {
+  const { request, button } = pendingConfirmation;
+  $('confirm').close();
+  button.remove();
+  send(request.message, { ...request, confirmWrite: true });
+};
+fetch('/actuator/health', { signal: AbortSignal.timeout(8000) })
+  .then(async response => {
+    const data = await response.json();
+    if (!response.ok || data.status !== 'UP') throw new Error('unavailable');
+    $('health').textContent = '服务已连接';
+    $('health').className = 'status online';
+  })
+  .catch(() => { $('health').textContent = '服务连接异常'; $('health').className = 'status offline'; });

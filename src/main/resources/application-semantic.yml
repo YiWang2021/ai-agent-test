@@ -1,0 +1,9 @@
+# Genuine local multilingual transformer embeddings. Prepare assets once with scripts/prepare-embedding.ps1.
+# Separate vector space and manifest namespace: never mix these vectors with HashingEmbeddingModel.
+support:
+  rag:
+    vector-table: support_vector_minilm_v1
+    index-namespace: minilm-v1
+    chunk-size: 120
+    chunk-overlap: 20
+    similarity-threshold: 0.2

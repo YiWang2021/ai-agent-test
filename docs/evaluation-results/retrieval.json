@@ -1,0 +1,18 @@
+{
+  "mode": "retrieval",
+  "total": 50,
+  "successful": 49,
+  "successRate": 0.98,
+  "averageLatencyMs": 7.0029,
+  "p95LatencyMs": 7.9725,
+  "meanReciprocalRank": 0.9467,
+  "responder": "SpringAiResponder",
+  "embeddingModel": "TransformersEmbeddingModel",
+  "failures": [
+    {
+      "question": "售后人员能看到别人的扫地机吗",
+      "expected": "policy/privacy.md",
+      "actual": "[manual/error-codes.md, manual/maintenance.md, manual/connectivity.md]"
+    }
+  ]
+}

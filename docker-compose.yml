@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: support_agent
+      POSTGRES_USER: support
+      POSTGRES_PASSWORD: support
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U support -d support_agent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-postgres,redis}
+      DB_URL: jdbc:postgresql://postgres:5432/support_agent
+      DB_USER: support
+      DB_PASSWORD: support
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SUPPORT_API_KEY: ${SUPPORT_API_KEY:-change-me}
+      SUPPORT_ADMIN_API_KEY: ${SUPPORT_ADMIN_API_KEY:-}
+      SUPPORT_OTHER_USER_API_KEY: ${SUPPORT_OTHER_USER_API_KEY:-}
+      SUPPORT_INSTANCE_LIMIT: ${SUPPORT_INSTANCE_LIMIT:-16}
+      SUPPORT_GLOBAL_LIMIT: ${SUPPORT_GLOBAL_LIMIT:-32}
+      SUPPORT_TENANT_LIMIT: ${SUPPORT_TENANT_LIMIT:-16}
+      SUPPORT_USER_LIMIT: ${SUPPORT_USER_LIMIT:-2}
+      SUPPORT_USER_RPM: ${SUPPORT_USER_RPM:-120}
+      SUPPORT_CONCURRENCY_NAMESPACE: ${SUPPORT_CONCURRENCY_NAMESPACE:-default}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+    volumes:
+      - ./data/models:/app/data/models:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pg_data:
+  redis_data:

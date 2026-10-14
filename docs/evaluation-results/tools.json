@@ -1,0 +1,12 @@
+{
+  "mode": "tools",
+  "total": 10,
+  "successful": 10,
+  "successRate": 1.0,
+  "averageLatencyMs": 2119.2213,
+  "p95LatencyMs": 3904.0727,
+  "meanReciprocalRank": 0.0,
+  "responder": "SpringAiResponder",
+  "embeddingModel": "TransformersEmbeddingModel",
+  "failures": []
+}

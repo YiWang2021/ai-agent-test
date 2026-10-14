@@ -1,0 +1,97 @@
+spring:
+  application:
+    name: java-ai-support-agent
+  ai:
+    tools:
+      throw-exception-on-error: true
+      limits:
+        max-calls-per-tool-default: ${SUPPORT_AGENT_MAX_TOOL_CALLS:8}
+        max-total-tool-calls: ${SUPPORT_AGENT_MAX_TOOL_CALLS:8}
+        on-limit-exceeded: THROW
+    model:
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+  datasource:
+    url: jdbc:h2:mem:support;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  data:
+    redis:
+      repositories:
+        enabled: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+  mvc:
+    async:
+      request-timeout: 35s
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  health:
+    redis:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+support:
+  concurrency:
+    instance-limit: ${SUPPORT_INSTANCE_LIMIT:16}
+    global-limit: ${SUPPORT_GLOBAL_LIMIT:32}
+    tenant-limit: ${SUPPORT_TENANT_LIMIT:16}
+    user-limit: ${SUPPORT_USER_LIMIT:2}
+    user-requests-per-minute: ${SUPPORT_USER_RPM:120}
+    lease-seconds: 30
+    namespace: ${SUPPORT_CONCURRENCY_NAMESPACE:default}
+  api-key: ${SUPPORT_API_KEY:demo-key}
+  auth:
+    accounts:
+      - api-key: ${SUPPORT_API_KEY:demo-key}
+        tenant-id: tenant-a
+        user-id: user-001
+        role: USER
+      - api-key: ${SUPPORT_ADMIN_API_KEY:}
+        tenant-id: tenant-a
+        user-id: admin-001
+        role: ADMIN
+      - api-key: ${SUPPORT_OTHER_USER_API_KEY:}
+        tenant-id: tenant-b
+        user-id: user-900
+        role: USER
+  rag:
+    candidate-k: 12
+    rerank-enabled: true
+    top-k: 4
+    similarity-threshold: 0.05
+    chunk-size: 700
+    chunk-overlap: 100
+  agent:
+    history-limit: 12
+    max-tool-calls: 8
+    timeout-seconds: 30
+  reliability:
+    max-attempts: 2
+    backoff-millis: 200
+    max-backoff-millis: 2000
+    failure-threshold: 3
+    open-seconds: 30
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-}]"

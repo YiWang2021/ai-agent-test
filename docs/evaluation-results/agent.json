@@ -1,0 +1,18 @@
+{
+  "mode": "agent",
+  "total": 50,
+  "successful": 49,
+  "successRate": 0.98,
+  "averageLatencyMs": 2268.2847,
+  "p95LatencyMs": 2879.57,
+  "meanReciprocalRank": 0.0,
+  "responder": "SpringAiResponder",
+  "embeddingModel": "TransformersEmbeddingModel",
+  "failures": [
+    {
+      "question": "设备不在线先检查什么",
+      "expected": "manual/connectivity.md:在线",
+      "actual": "设备离线时，建议按以下顺序排查（来源：产品手册《充电与离线排查》manual/connectivity.md）：\n\n1. **确认充电座通电**，并检查家庭网络是否可用。\n2. **将设备放回充电座**。\n3. **长按电源键 10 秒重启设备**。\n4. 若仍离线，**同时长按回充键和局部清扫键 5 秒**，重置网络... tools=[ToolEvent[tool=search_product_knowledge, code=OK]]"
+    }
+  ]
+}

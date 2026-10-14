@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小智 · 智能售后助手</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/"><span class="logo">✳</span><span>小智 <small>SUPPORT AGENT</small></span></a>
+    <button id="new-chat" class="new-chat">＋ 开启新对话</button>
+    <div class="section-label">探索一下</div>
+    <nav aria-label="体验场景">
+      <button class="scenario" data-prompt="E03 是什么，应该怎样处理？"><span>◎</span><div>故障排查<small>从产品手册中寻找答案</small></div><b>↗</b></button>
+      <button class="scenario" data-prompt="查询 device-001 当前状态和电量"><span>▣</span><div>设备状态<small>看看设备现在怎么样</small></div><b>↗</b></button>
+      <button class="scenario" data-prompt="查询 device-001 的耗材和主刷寿命"><span>◷</span><div>耗材建议<small>了解什么时候需要更换</small></div><b>↗</b></button>
+      <button class="scenario" data-prompt="查询 device-001 的未关闭工单"><span>▤</span><div>我的工单<small>查询还在处理的问题</small></div><b>↗</b></button>
+      <button class="scenario" data-prompt="给 device-001 创建工单，E03 反复出现"><span>＋</span><div>申请报修<small>确认后创建售后工单</small></div><b>↗</b></button>
+    </nav>
+    <div class="sidebar-bottom"><div class="tip"><strong>先试试，再探索。</strong><p>问一个问题，看看助手如何查手册、查设备，再帮你解决问题。</p></div><button id="settings-open" class="settings-button">⚙ 连接设置 <span>→</span></button><div class="identity"><span class="avatar">U</span><div id="identity-label">user-001<small>tenant-a</small></div><span class="demo-tag">体验</span></div></div>
+  </aside>
+  <main>
+    <header><div><strong>智能售后工作台</strong><span class="header-sub">你的设备问题，从这里解决</span></div><span id="health" class="status" role="status">正在连接</span></header>
+    <section id="conversation" class="conversation" aria-label="聊天记录">
+      <div id="welcome" class="welcome"><div class="hero-icon">✳</div><div class="eyebrow">HELLO, I'M YOUR SUPPORT AGENT</div><h1>你好，有什么可以帮你？</h1><p>设备故障、耗材更换，或是一次售后报修。<br>把问题交给我，我们一步步解决。</p><div class="suggestions"><button data-prompt="E03 是什么，应该怎样处理？"><span>故障排查</span><strong>设备出现 E03，怎么办？</strong><i>↗</i></button><button data-prompt="查询 device-001 当前状态和电量"><span>设备查询</span><strong>帮我看看设备状态</strong><i>↗</i></button><button data-prompt="查询 device-001 的耗材和主刷寿命"><span>保养建议</span><strong>主刷该不该更换了？</strong><i>↗</i></button><button data-prompt="给 device-001 创建工单，E03 反复出现"><span>售后服务</span><strong>问题反复，帮我申请报修</strong><i>↗</i></button></div></div>
+      <div id="messages" role="log" aria-live="polite"></div>
+    </section>
+    <div class="composer-wrap"><form id="chat-form" class="composer"><label class="sr-only" for="message">输入问题</label><textarea id="message" rows="2" maxlength="4000" placeholder="描述你的问题，例如：扫地机器人一直提示 E03…" required></textarea><div class="composer-bottom"><span>✧ 支持知识问答 · 设备查询 · 售后报修</span><button id="send" type="submit">发送 <span>↑</span></button></div></form><div class="footer-note">Enter 发送 · Shift + Enter 换行 <span>创建工单前，请先核对并确认</span></div></div>
+  </main>
+  <dialog id="settings"><form id="settings-form"><h2>连接设置</h2><p>填写访问密钥，服务端验证后显示绑定的身份。密钥仅保留在当前页面内存中。</p><label>API Key<input id="api-key" type="password" value="demo-key" required autocomplete="off"></label><label>租户 ID<input id="tenant" value="tenant-a" readonly></label><label>用户 ID<input id="user" value="user-001" readonly></label><p class="dialog-note">保存后会开启新对话。默认演示设备为 device-001。</p><div class="dialog-actions"><button type="button" id="settings-close">取消</button><button class="primary" type="submit">保存设置</button></div></form></dialog>
+  <dialog id="confirm"><h2>确认提交工单？</h2><p>本次请求将允许助手创建真实的售后工单，请核对以下内容：</p><div id="confirm-text" class="confirm-text"></div><div class="dialog-actions"><button id="confirm-cancel">暂不提交</button><button id="confirm-submit" class="primary">确认并提交</button></div></dialog>
+</body>
+</html>
+
