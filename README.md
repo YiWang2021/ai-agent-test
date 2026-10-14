@@ -4,6 +4,8 @@
 
 **从 [12 项能力学习路线](docs/LEARNING_PATH.md) 开始阅读。** 业务操作见 [用户手册](docs/USER_GUIDE.md)，实测证据见 [验证记录](docs/VERIFICATION.md)。
 
+`dev` 分支新增设备选择与分页工单记录，完整体验步骤、接口及提交学习顺序见 [开发里程碑](docs/DEV_MILESTONES.md)。更新后请在 IDEA 重新构建并重启应用。
+
 准备多人运行或面试并发问题，请读 [并发保护、正式运行与面试说明](docs/CONCURRENCY.md)：已加入共享全局/租户/用户额度、用户速率限制、会话续租及历史写入所有权检查、PostgreSQL 多实例知识更新事务保护。正式模式使用 `./scripts/configure-production.ps1` 准备凭据，再用 `./scripts/start-production.ps1` 启动；它与原来的学习模式分开。
 
 ## 技术栈与职责
