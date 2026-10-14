@@ -17,11 +17,9 @@ async function loadTickets() {
   $('tickets-notice').textContent = '正在加载工单…';
   ['tickets-previous', 'tickets-next', 'tickets-refresh'].forEach(id => { $(id).disabled = true; });
   try {
-    const response = await fetch(`/api/devices/${encodeURIComponent(selectedDevice)}/tickets?page=${ticketPage}&size=10`, {
+    const tickets = await SupportClient.json(`/api/devices/${encodeURIComponent(selectedDevice)}/tickets?page=${ticketPage}&size=10`, {
       headers: { 'X-API-Key': identity.key }, signal: AbortSignal.timeout(8000)
     });
-    if (!response.ok) throw new Error('工单加载失败，请刷新重试或检查连接设置。');
-    const tickets = await response.json();
     if (version !== ticketLoadVersion) return;
     $('tickets-notice').textContent = `${selectedDevice} · 第 ${ticketPage + 1} 页${tickets.length ? '' : ' · 暂无工单记录'}`;
     for (const ticket of tickets) {
@@ -74,9 +72,7 @@ async function loadDevices() {
   $('device-select').disabled = true;
   $('device-summary').textContent = '';
   try {
-    const response = await fetch('/api/devices', { headers: { 'X-API-Key': key }, signal: AbortSignal.timeout(8000) });
-    if (!response.ok) throw new Error('设备加载失败，请检查连接设置后刷新设备。');
-    const data = await response.json();
+    const data = await SupportClient.json('/api/devices', { headers: { 'X-API-Key': key } });
     if (version !== deviceLoadVersion) return;
     devices = data;
     selectedDevice = devices[0]?.id || '';
@@ -146,28 +142,19 @@ function addConfirmation(content, request) {
 
 async function send(message, confirmedRequest = null) {
   if (busy || !message.trim()) return;
-  const request = confirmedRequest || { conversationId, message: message.trim(), confirmWrite: false, idempotencyKey: uid() };
+  const request = confirmedRequest || { conversationId, message: SupportClient.devicePrompt(message.trim(), selectedDevice), confirmWrite: false, idempotencyKey: uid() };
+  if (request.message.length > 4000) { addMessage('消息过长，请缩短到 3900 字以内后重试。'); return; }
   addMessage(request.confirmWrite ? `确认提交工单：${request.message}` : request.message, 'user');
   $('message').value = '';
   setBusy(true);
   const reply = addMessage('正在查询，请稍等…');
   try {
-    const response = await fetch('/api/chat', {
+    const data = await SupportClient.json('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': identity.key },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(60000)
     });
-    if (!response.ok) {
-      const traceId = response.headers.get('X-Trace-Id');
-      const traceHint = traceId ? ` 排查编号 TRACE ${traceId}` : '';
-      if (response.status === 409) throw new Error('当前对话仍有请求在处理，请等待完成后再发送。' + traceHint);
-      if (response.status === 429) throw new Error('请求过于频繁或服务繁忙，请稍后再试。' + traceHint);
-      if (response.status === 503) throw new Error('服务暂时不可用；如果涉及报修，请先核实工单状态。' + traceHint);
-      if (response.status === 401 || response.status === 403) throw new Error('访问未通过验证，请在左下角「连接设置」检查 API Key、租户和用户 ID。' + traceHint);
-      throw new Error(`服务暂时无法处理请求（HTTP ${response.status}），请查看 IDEA 的后端日志后重试。${traceHint}`);
-    }
-    const data = await response.json();
     if (typeof data.answer !== 'string') throw new Error('接口返回格式异常，请检查后端日志。');
     reply.bubble.textContent = data.answer;
     if (data.citations?.length) {
@@ -246,9 +233,7 @@ $('settings-form').onsubmit = async event => {
   const submit = $('settings-form').querySelector('button[type="submit"], button.primary');
   submit.disabled = true;
   try {
-    const response = await fetch('/api/session', { headers: { 'X-API-Key': key }, signal: AbortSignal.timeout(8000) });
-    if (!response.ok) throw new Error('密钥无效，无法切换账号。请填写后端为该账号配置的访问密钥。');
-    const account = await response.json();
+    const account = await SupportClient.json('/api/session', { headers: { 'X-API-Key': key } });
     identity = { key, tenant: account.tenantId, user: account.userId };
   const tenantLabel = document.createElement('small');
   tenantLabel.textContent = identity.tenant;
@@ -262,7 +247,9 @@ $('settings-form').onsubmit = async event => {
 };
 $('confirm-cancel').onclick = () => $('confirm').close();
 $('confirm-submit').onclick = () => {
+  if (!pendingConfirmation || busy) return;
   const { request, button } = pendingConfirmation;
+  pendingConfirmation = null;
   $('confirm').close();
   button.remove();
   send(request.message, { ...request, confirmWrite: true });
@@ -276,4 +263,19 @@ fetch('/actuator/health', { signal: AbortSignal.timeout(8000) })
   })
   .catch(() => { $('health').textContent = '服务连接异常'; $('health').className = 'status offline'; });
 
-loadDevices();
+async function initializeAccount() {
+  setBusy(true);
+  try {
+    const account = await SupportClient.json('/api/session', { headers: { 'X-API-Key': identity.key } });
+    identity = { ...identity, tenant: account.tenantId, user: account.userId };
+    const tenant = document.createElement('small');
+    tenant.textContent = identity.tenant;
+    $('identity-label').replaceChildren(document.createTextNode(identity.user), tenant);
+    await loadDevices();
+  } catch (error) {
+    $('identity-label').textContent = '账号未连接';
+    $('device-select').replaceChildren(new Option('请配置访问密钥', ''));
+    $('device-summary').textContent = error.message;
+  } finally { setBusy(false); }
+}
+initializeAccount();
