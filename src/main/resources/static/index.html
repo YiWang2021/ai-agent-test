@@ -23,6 +23,12 @@
   </aside>
   <main>
     <header><div><strong>智能售后工作台</strong><span class="header-sub">你的设备问题，从这里解决</span></div><span id="health" class="status" role="status">正在连接</span></header>
+    <section class="device-bar" aria-label="我的设备">
+      <label for="device-select">当前设备</label>
+      <select id="device-select" disabled><option value="">正在加载…</option></select>
+      <button id="devices-refresh" type="button">刷新设备</button>
+      <span id="device-summary" role="status"></span>
+    </section>
     <section id="conversation" class="conversation" aria-label="聊天记录">
       <div id="welcome" class="welcome"><div class="hero-icon">✳</div><div class="eyebrow">HELLO, I'M YOUR SUPPORT AGENT</div><h1>你好，有什么可以帮你？</h1><p>设备故障、耗材更换，或是一次售后报修。<br>把问题交给我，我们一步步解决。</p><div class="suggestions"><button data-prompt="E03 是什么，应该怎样处理？"><span>故障排查</span><strong>设备出现 E03，怎么办？</strong><i>↗</i></button><button data-prompt="查询 device-001 当前状态和电量"><span>设备查询</span><strong>帮我看看设备状态</strong><i>↗</i></button><button data-prompt="查询 device-001 的耗材和主刷寿命"><span>保养建议</span><strong>主刷该不该更换了？</strong><i>↗</i></button><button data-prompt="给 device-001 创建工单，E03 反复出现"><span>售后服务</span><strong>问题反复，帮我申请报修</strong><i>↗</i></button></div></div>
       <div id="messages" role="log" aria-live="polite"></div>

@@ -5,6 +5,44 @@ let conversationId = uid();
 let identity = { key: 'demo-key', tenant: 'tenant-a', user: 'user-001' };
 let busy = false;
 let pendingConfirmation = null;
+let devices = [];
+let selectedDevice = '';
+let deviceLoadVersion = 0;
+
+function renderDevice() {
+  const device = devices.find(item => item.id === selectedDevice);
+  $('device-summary').textContent = device
+    ? `${device.status} · 电量 ${device.batteryLevel}% · 主刷寿命 ${device.brushLifePercent}%${device.errorCode ? ' · 故障 ' + device.errorCode : ''}`
+    : '当前账号暂无设备，可以先体验知识问答。';
+}
+
+async function loadDevices() {
+  const version = ++deviceLoadVersion;
+  const key = identity.key;
+  devices = [];
+  selectedDevice = '';
+  $('device-select').replaceChildren(new Option('正在加载…', ''));
+  $('device-select').disabled = true;
+  $('device-summary').textContent = '';
+  try {
+    const response = await fetch('/api/devices', { headers: { 'X-API-Key': key }, signal: AbortSignal.timeout(8000) });
+    if (!response.ok) throw new Error('设备加载失败，请检查连接设置后刷新设备。');
+    const data = await response.json();
+    if (version !== deviceLoadVersion) return;
+    devices = data;
+    selectedDevice = devices[0]?.id || '';
+    $('device-select').replaceChildren(...(devices.length
+      ? devices.map(d => new Option(`${d.model} · ${d.id}`, d.id)) : [new Option('暂无设备', '')]));
+    $('device-select').disabled = busy || !devices.length;
+    renderDevice();
+  } catch (error) {
+    if (version !== deviceLoadVersion) return;
+    $('device-select').replaceChildren(new Option('加载失败', ''));
+    $('device-summary').textContent = error.message;
+  }
+}
+$('device-select').onchange = () => { selectedDevice = $('device-select').value; resetChat(); renderDevice(); };
+$('devices-refresh').onclick = () => { resetChat(); loadDevices(); };
 
 function resetChat() {
   pendingConfirmation = null;
@@ -17,6 +55,8 @@ function resetChat() {
 
 function setBusy(value) {
   busy = value;
+  $('device-select').disabled = value || !devices.length;
+  $('devices-refresh').disabled = value;
   document.querySelectorAll('[data-prompt], #send, #new-chat, #settings-open, .action').forEach(el => { el.disabled = value; });
   $('message').disabled = value;
   $('send').textContent = value ? '思考中…' : '发送 ↑';
@@ -124,7 +164,14 @@ async function send(message, confirmedRequest = null) {
   }
 }
 
-document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => send(button.dataset.prompt)));
+document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => {
+  const prompt = button.dataset.prompt;
+  if (prompt.includes('device-001') && !selectedDevice) {
+    addMessage('请先选择设备。没有设备时，可以先试试故障知识问答。');
+    return;
+  }
+  send(prompt.replaceAll('device-001', selectedDevice));
+}));
 $('chat-form').addEventListener('submit', event => { event.preventDefault(); send($('message').value); });
 $('message').addEventListener('keydown', event => {
   if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); $('chat-form').requestSubmit(); }
@@ -159,6 +206,7 @@ $('settings-form').onsubmit = async event => {
   $('identity-label').replaceChildren(document.createTextNode(identity.user), tenantLabel);
   $('settings').close();
   resetChat();
+  loadDevices();
     settingsNotice.textContent = '';
   } catch (error) { settingsNotice.textContent = error.message; }
   finally { submit.disabled = false; }
@@ -178,3 +226,5 @@ fetch('/actuator/health', { signal: AbortSignal.timeout(8000) })
     $('health').className = 'status online';
   })
   .catch(() => { $('health').textContent = '服务连接异常'; $('health').className = 'status offline'; });
+
+loadDevices();
