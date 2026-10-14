@@ -27,6 +27,7 @@
       <label for="device-select">当前设备</label>
       <select id="device-select" disabled><option value="">正在加载…</option></select>
       <button id="devices-refresh" type="button">刷新设备</button>
+      <button id="tickets-open" type="button">查看工单记录</button>
       <span id="device-summary" role="status"></span>
     </section>
     <section id="conversation" class="conversation" aria-label="聊天记录">
@@ -37,6 +38,7 @@
   </main>
   <dialog id="settings"><form id="settings-form"><h2>连接设置</h2><p>填写访问密钥，服务端验证后显示绑定的身份。密钥仅保留在当前页面内存中。</p><label>API Key<input id="api-key" type="password" value="demo-key" required autocomplete="off"></label><label>租户 ID<input id="tenant" value="tenant-a" readonly></label><label>用户 ID<input id="user" value="user-001" readonly></label><p class="dialog-note">保存后会开启新对话。默认演示设备为 device-001。</p><div class="dialog-actions"><button type="button" id="settings-close">取消</button><button class="primary" type="submit">保存设置</button></div></form></dialog>
   <dialog id="confirm"><h2>确认提交工单？</h2><p>本次请求将允许助手创建真实的售后工单，请核对以下内容：</p><div id="confirm-text" class="confirm-text"></div><div class="dialog-actions"><button id="confirm-cancel">暂不提交</button><button id="confirm-submit" class="primary">确认并提交</button></div></dialog>
+  <dialog id="tickets-dialog" aria-labelledby="tickets-title"><h2 id="tickets-title">设备工单记录</h2><p id="tickets-notice" role="status"></p><div id="tickets-list"></div><div class="dialog-actions"><button id="tickets-previous">上一页</button><button id="tickets-next">下一页</button><button id="tickets-refresh">刷新</button><button id="tickets-close">关闭</button></div></dialog>
 </body>
 </html>
 

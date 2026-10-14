@@ -8,6 +8,55 @@ let pendingConfirmation = null;
 let devices = [];
 let selectedDevice = '';
 let deviceLoadVersion = 0;
+let ticketPage = 0;
+let ticketLoadVersion = 0;
+
+async function loadTickets() {
+  const version = ++ticketLoadVersion;
+  $('tickets-list').replaceChildren();
+  $('tickets-notice').textContent = '正在加载工单…';
+  ['tickets-previous', 'tickets-next', 'tickets-refresh'].forEach(id => { $(id).disabled = true; });
+  try {
+    const response = await fetch(`/api/devices/${encodeURIComponent(selectedDevice)}/tickets?page=${ticketPage}&size=10`, {
+      headers: { 'X-API-Key': identity.key }, signal: AbortSignal.timeout(8000)
+    });
+    if (!response.ok) throw new Error('工单加载失败，请刷新重试或检查连接设置。');
+    const tickets = await response.json();
+    if (version !== ticketLoadVersion) return;
+    $('tickets-notice').textContent = `${selectedDevice} · 第 ${ticketPage + 1} 页${tickets.length ? '' : ' · 暂无工单记录'}`;
+    for (const ticket of tickets) {
+      const card = document.createElement('article');
+      card.className = 'ticket-card';
+      const title = document.createElement('strong');
+      title.textContent = ticket.status === 'OPEN' ? '待处理' : ticket.status;
+      const issue = document.createElement('p');
+      issue.textContent = ticket.issue;
+      const metadata = document.createElement('small');
+      metadata.textContent = `${new Date(ticket.createdAt).toLocaleString()} · ${ticket.id}`;
+      card.append(title, issue, metadata);
+      $('tickets-list').append(card);
+    }
+    $('tickets-next').disabled = tickets.length < 10;
+  } catch (error) {
+    if (version === ticketLoadVersion) $('tickets-notice').textContent = error.message;
+  } finally {
+    if (version === ticketLoadVersion) {
+      $('tickets-previous').disabled = ticketPage === 0;
+      $('tickets-refresh').disabled = false;
+    }
+  }
+}
+$('tickets-open').onclick = () => {
+  if (!selectedDevice) { addMessage('请先选择设备，再查看工单记录。'); return; }
+  ticketPage = 0;
+  $('tickets-dialog').showModal();
+  loadTickets();
+};
+$('tickets-close').onclick = () => $('tickets-dialog').close();
+$('tickets-dialog').addEventListener('close', () => { ticketLoadVersion++; });
+$('tickets-refresh').onclick = loadTickets;
+$('tickets-previous').onclick = () => { ticketPage--; loadTickets(); };
+$('tickets-next').onclick = () => { ticketPage++; loadTickets(); };
 
 function renderDevice() {
   const device = devices.find(item => item.id === selectedDevice);
